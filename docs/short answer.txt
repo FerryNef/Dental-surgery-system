@@ -1,0 +1,58 @@
+1. What is Spring?
+Spring is a powerful, lightweight, and flexible open-source framework for building enterprise-level Java applications. It simplifies Java development by providing infrastructure support and promoting best practices such as dependency injection, aspect-oriented programming, and layered architecture.
+
+2. What is Spring Boot?
+Spring Boot is an extension of the Spring framework that makes it easier to create stand-alone, production-ready Spring applications. It minimizes boilerplate configuration and includes embedded servers like Tomcat.
+
+Example:
+A Spring Boot app can be launched with:
+
+
+@SpringBootApplication
+public class MyApp {
+    public static void main(String[] args) {
+        SpringApplication.run(MyApp.class, args);
+    }
+}
+
+
+3. What is the relation between Spring platform and Spring Boot?
+Spring Boot is part of the larger Spring platform. The Spring platform includes multiple projects like Spring Core, Spring MVC, Spring Data, Spring Security, etc. Spring Boot builds on top of these and provides auto-configuration, starters, and embedded servers to simplify setup.
+
+Think of Spring Boot as a tool that bootstraps your Spring project quickly with sensible defaults.
+
+
+4. What is the relation between Spring platform and Spring framework?
+The Spring platform refers to the entire ecosystem of Spring projects (e.g., Spring Framework, Spring Boot, Spring Data, etc.), while the Spring Framework is the core of the platform — it provides the base features like Dependency Injection, Bean lifecycle management, and AOP.
+
+
+
+
+5. What is Dependency Injection and how is it done in the Spring platform/framework?
+Dependency Injection (DI) is a design pattern where an object's dependencies are provided externally, rather than the object creating them itself. It promotes loose coupling and testability.
+
+In Spring, DI is achieved using annotations like:
+
+
+@Service
+public class BookService {
+    private final BookRepository repo;
+
+    @Autowired
+    public BookService(BookRepository repo) {
+        this.repo = repo;
+    }
+}
+Spring handles the creation and injection of the BookRepository dependency.
+
+
+
+6. What is Inversion of Control (IoC) and how is it related to Spring?
+Inversion of Control is a principle where control of object creation and lifecycle is delegated to a container (Spring’s IoC container). Rather than creating objects manually using new, Spring injects and manages objects (beans).
+
+Spring implements IoC using its ApplicationContext, which scans and manages the beans and their dependencies.
+
+Example:
+
+ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+MyService service = context.getBean(MyService.class);
