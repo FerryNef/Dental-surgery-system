@@ -41,4 +41,7 @@ Below is the domain model representing the core entities and relationships in th
 
 
 ## 🛠 Technologies Used
+- 📝 StarUML (for UML class diagram)
+- 📂 GitHub for version control
+
 
