@@ -40,6 +40,13 @@ Below is the domain model representing the core entities and relationships in th
 ---
 
 
+## 🗃️ Entity Relationship Diagram
+The following ER diagram represents the database design for the Advantis Dental Surgery (ADS) system. It outlines how patients, dentists, appointments, surgeries, office managers, and billing records are related within the system.
+
+![ER Diagram](diagrams/ERD.png)
+
+---
+
 ## 🛠 Technologies Used
 - 📝 StarUML (for UML class diagram)
 - 📂 GitHub for version control
