@@ -1,9 +1,10 @@
 
+
+
 INSERT INTO address (id, street, city, state, zip_code, country) VALUES
                                                                      (1, '10 Dental St', 'Chicago', 'IL', '60007', 'USA'),
                                                                      (2, '13 Dental St', 'New York', 'NY', '10001', 'USA'),
                                                                      (3, '15 Dental St', 'San Francisco', 'CA', '94105', 'USA');
-
 
 
 INSERT INTO surgery (id, name, address_id, phone) VALUES

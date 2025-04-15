@@ -8,4 +8,5 @@ public interface AddressService {
     List<Address> getAllAddresses();
     void deleteAddress(Long id);
     Address updateAddress(Address address);
+    List<Address> getAllAddressesSortedByCity();
 }

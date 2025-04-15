@@ -12,4 +12,8 @@ public interface PatientService {
     Patient updatePatient(Long id, Patient patient);
     void deletePatient(Long id);
 
+    List<Patient> getAllPatientsSortedByLastName();
+
+    List<Patient> searchPatients(String searchString);
+
 }

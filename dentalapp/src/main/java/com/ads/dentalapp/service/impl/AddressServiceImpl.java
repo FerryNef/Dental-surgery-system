@@ -16,6 +16,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public Address saveAddress(Address address) {
+
         return addressRepository.save(address);
     }
 
@@ -38,5 +39,10 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public Address updateAddress(Address address) {
         return addressRepository.save(address);
+    }
+
+    @Override
+    public List<Address> getAllAddressesSortedByCity() {
+        return addressRepository.findAllByOrderByCityAsc();
     }
 }
