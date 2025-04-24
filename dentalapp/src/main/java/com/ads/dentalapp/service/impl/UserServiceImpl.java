@@ -5,7 +5,6 @@ import com.ads.dentalapp.dto.response.UserResponseDTO;
 import com.ads.dentalapp.mapper.UserMapper;
 import com.ads.dentalapp.model.Role;
 import com.ads.dentalapp.model.User;
-import com.ads.dentalapp.repository.RoleRepository;
 import com.ads.dentalapp.repository.UserRepository;
 import com.ads.dentalapp.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,6 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
     private final UserMapper userMapper;
 
 
@@ -28,13 +26,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDTO createUser(UserRequestDTO userRequestDto) {
-        Optional<User> optionalUser = userRepository.findByUsername(userRequestDto.username());
+        Optional<User> optionalUser = userRepository.findByUsername(userRequestDto.email());
         if (optionalUser.isPresent()) {
             throw new RuntimeException("Username already exists");
         }
 
-        Role role = roleRepository.findByName(userRequestDto.roleRequestDto().name())
-                .orElseGet(() -> roleRepository.save(new Role(userRequestDto.roleRequestDto().name())));
+        Role role;
+        try {
+            role = Role.valueOf(userRequestDto.roleRequestDto().name().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid role: " + userRequestDto.roleRequestDto().name());
+        }
 
         User user = userMapper.userRequestDtoToUser(userRequestDto);
         user.setRole(role);
@@ -47,11 +49,15 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        user.setUsername(userRequestDto.username());
+        user.setUsername(userRequestDto.email());
         user.setPassword(userRequestDto.password());
 
-        Role role = roleRepository.findByName(userRequestDto.roleRequestDto().name())
-                .orElseGet(() -> roleRepository.save(new Role(userRequestDto.roleRequestDto().name())));
+        Role role;
+        try {
+            role = Role.valueOf(userRequestDto.roleRequestDto().name().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid role: " + userRequestDto.roleRequestDto().name());
+        }
 
         user.setRole(role);
 

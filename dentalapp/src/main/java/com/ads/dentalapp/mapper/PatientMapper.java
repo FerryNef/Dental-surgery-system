@@ -8,6 +8,8 @@ import com.ads.dentalapp.model.Patient;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 
 import java.util.List;
@@ -16,7 +18,13 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface PatientMapper {
 
-    @Mapping(target = "addressId", expression = "java(patient.getAddress() != null ? patient.getAddress().getId() : null)")
+
+    default Page<PatientResponseDTO> toDtoPage(Page<Patient> patients) {
+        List<PatientResponseDTO> patientDtos = patients.map(this::toDto).getContent();
+        return new PageImpl<>(patientDtos, patients.getPageable(), patients.getTotalElements());
+    }
+
+    @Mapping(target = "addressId", source = "address.id")
     PatientResponseDTO toDto(Patient patient);
 
     @Mapping(target = "address", source = "addressId", qualifiedByName = "mapAddressIdToAddress")

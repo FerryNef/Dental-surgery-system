@@ -1,14 +1,20 @@
 package com.ads.dentalapp.service.impl;
 
+import com.ads.dentalapp.dto.request.PatientRequestDTO;
 import com.ads.dentalapp.exception.PatientNotFoundException;
 import com.ads.dentalapp.model.Address;
+import com.ads.dentalapp.model.Bill;
 import com.ads.dentalapp.model.Patient;
 import com.ads.dentalapp.repository.AddressRepository;
 import com.ads.dentalapp.repository.PatientRepository;
 import com.ads.dentalapp.service.PatientService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -18,22 +24,46 @@ public class PatientServiceImpl implements PatientService {
     final PatientRepository patientRepository;
     final AddressRepository addressRepository;
 
-    public List<Patient> getAllPatients() {
-        return patientRepository.findAll();
+    @Override
+    public Page<Patient> getAllPatients(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return patientRepository.findAll(pageable);
     }
 
     public Patient getPatientById(Long id) {
         return patientRepository.findById(id).orElseThrow(() -> new PatientNotFoundException(id));
     }
 
-    public Patient savePatient(Patient patient) {
-        if (patient.getAddress() != null && patient.getAddress().getId() != null) {
-            Address fullAddress = addressRepository.findById(patient.getAddress().getId())
-                    .orElseThrow(() -> new RuntimeException("Address not found"));
-            patient.setAddress(fullAddress);
+    public Patient savePatient(PatientRequestDTO patientDTO) {
+        if (patientRepository.findByEmail(patientDTO.email()).isPresent()) {
+            throw new RuntimeException("Patient already exists with email: " + patientDTO.email());
         }
+        Patient patient = new Patient();
+        patient.setFirstName(patientDTO.firstName());
+        patient.setLastName(patientDTO.lastName());
+        patient.setPhone(patientDTO.phone());
+        patient.setEmail(patientDTO.email());
+        patient.setDateOfBirth(patientDTO.dateOfBirth());
+
+
+        if (patientDTO.addressId() != null) {
+            Address address = addressRepository.findById(patientDTO.addressId())
+                    .orElseThrow(() -> new RuntimeException("Address not found"));
+            patient.setAddress(address);
+        }
+
+
+//        Bill bill = new Bill();
+//        bill.setAmount(amount);
+//        bill.setStatus(status);
+//        bill.setBillDate(LocalDate.now());
+//        bill.setPatient(patient);
+
+      //  patient.setBills(List.of(bill));
+
         return patientRepository.save(patient);
     }
+
 
     public Patient updatePatient(Long id, Patient updatedPatient) {
         Patient existing = patientRepository.findById(id)

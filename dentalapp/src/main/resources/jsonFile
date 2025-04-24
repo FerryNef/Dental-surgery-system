@@ -1,0 +1,21 @@
+--User Register--
+{
+firstname :"fer",
+lastName : "neff",
+email : "feryel.en@miu.ed" ,
+password : "ferneff" ,
+role : "PATIENT"
+}
+
+--user sign in--
+{
+  "username": "ian@ads.com",
+  "password": "ferneff"
+}
+
+--request schedule appointment --
+localhost:8080/api/patient/appointments/3/reschedule
+{
+  "newDate": "2025-05-01",
+  "newTime": "10:30"
+}

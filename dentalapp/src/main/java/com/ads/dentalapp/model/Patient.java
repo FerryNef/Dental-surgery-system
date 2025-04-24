@@ -30,6 +30,10 @@ public class Patient {
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
     private List<Bill> bills = new ArrayList<>();
 
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     public Long getId() {
         return id;
     }
@@ -100,5 +104,9 @@ public class Patient {
 
     public void setBills(List<Bill> bills) {
         this.bills = bills;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

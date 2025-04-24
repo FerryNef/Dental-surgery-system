@@ -17,14 +17,22 @@ public class Bill {
 
     private BigDecimal amount;
 
-    private String status; // e.g., "PAID", "UNPAID", "PENDING"
+    private String status; // e.g., "PAID", "UNPAID"
 
     @ManyToOne
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
+    public void setPatient(Patient patient) {
+        this.patient = patient;
+    }
+
     public String getStatus() {
         return status;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
     }
 
     public void setStatus(String status) {

@@ -1,42 +1,72 @@
 package com.ads.dentalapp.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
 import java.util.Set;
 
 @Entity
 @Table(name="users")
-public class User  {
+@Data
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Column(name = "fist_name")
+    private String firstName;
+
+    @Column(name = "last_name")
+    private String lastName;
 
     @Column(updatable = false, unique = true)
     private String username;
 
     @Column(nullable = false)
-    private String password; // 🔐 should be hashed before saving
+    private String password;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role_id")
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
     private Role role;
+
+    @OneToOne(mappedBy = "user")
+    private Patient patient;
+
+    @OneToOne
+    @JoinColumn(name = "dentist_id")
+    private Dentist dentist;
 
     public User() {}
 
-    public User(String username, String password, Set<Role> roles) {
+    public User(String username,String firstName, String lastName, String password, Role role) {
         this.username = username;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.password = password;
         this.role = role;
     }
 
-    public Long getId() {
-        return id;
+
+
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return role.getAuthorities();
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @Override
+    public boolean isAccountNonExpired() { return true; }
+
+    @Override
+    public boolean isAccountNonLocked() { return true; }
+
+    @Override
+    public boolean isCredentialsNonExpired() { return true; }
+
+    @Override
+    public boolean isEnabled() { return true; }
+
 
     public String getUsername() {
         return username;
@@ -54,13 +84,6 @@ public class User  {
         this.password = password;
     }
 
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
 
 
 }
