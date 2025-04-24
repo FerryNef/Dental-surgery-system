@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface BillRepository extends JpaRepository<Bill, Long> {
     List<Bill> findByPatientId(Long patientId);
+    boolean existsByPatientIdAndStatus(Long patientId, String status);
 }

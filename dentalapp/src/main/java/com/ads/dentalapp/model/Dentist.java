@@ -16,6 +16,20 @@ public class Dentist {
     private String phone;
     private String email;
     private String specialization;
+    @OneToOne
+    private User user;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     @OneToMany(mappedBy = "dentist", cascade = CascadeType.ALL)
     private List<Appointment> appointments = new ArrayList<>();

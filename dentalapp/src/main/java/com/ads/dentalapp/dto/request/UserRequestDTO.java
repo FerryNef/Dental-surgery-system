@@ -4,7 +4,7 @@ import org.hibernate.annotations.processing.Pattern;
 
 public record UserRequestDTO(
 
-        String username,
+        String email,
         String password,
         RoleRequestDTO roleRequestDto
 ) {

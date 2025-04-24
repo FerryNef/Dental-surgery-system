@@ -1,20 +1,20 @@
 package com.ads.dentalapp.service.impl;
 import com.ads.dentalapp.dto.request.AppointmentRequestDTO;
 import com.ads.dentalapp.dto.response.AppointmentResponseDTO;
+import com.ads.dentalapp.dto.response.PatientResponseDTO;
+import com.ads.dentalapp.exception.AppointmentConflictException;
+import com.ads.dentalapp.exception.UnpaidBillException;
 import com.ads.dentalapp.mapper.AppointmentMapper;
-import com.ads.dentalapp.model.Appointment;
-import com.ads.dentalapp.model.Dentist;
-import com.ads.dentalapp.model.Patient;
-import com.ads.dentalapp.model.Surgery;
-import com.ads.dentalapp.repository.AppointmentRepository;
-import com.ads.dentalapp.repository.DentistRepository;
-import com.ads.dentalapp.repository.PatientRepository;
-import com.ads.dentalapp.repository.SurgeryRepository;
+import com.ads.dentalapp.mapper.PatientMapper;
+import com.ads.dentalapp.model.*;
+import com.ads.dentalapp.repository.*;
 import com.ads.dentalapp.service.AppointmentService;
 import com.ads.dentalapp.service.BillService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -28,6 +28,8 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final DentistRepository dentistRepository;
     private final SurgeryRepository surgeryRepository;
     private final AppointmentMapper appointmentMapper;
+    private final UserRepository userRepository;
+    private final PatientMapper patientMapper;
 
     @Override
     public Appointment saveAppointment(Appointment appointment) {
@@ -45,6 +47,15 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointmentRepository.findAll();
     }
 
+    @Override
+    public PatientResponseDTO getPatientForAppointment(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(()-> new RuntimeException("Appointment not found"));
+
+        Patient patient = appointment.getPatient();
+        return patientMapper.toDto(patient);
+    }
+
 
     @Override
     public AppointmentResponseDTO scheduleAppointment(AppointmentRequestDTO dto) {
@@ -52,11 +63,26 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
         if (billService.hasUnpaidBills(dto.patientId())) {
-            throw new IllegalStateException("Cannot schedule appointment. Unpaid bills found.");
+            throw new UnpaidBillException("Cannot schedule appointment. Unpaid bills found.");
         }
 
         Dentist dentist = dentistRepository.findById(dto.dentistId())
                 .orElseThrow(() -> new RuntimeException("Dentist not found"));
+
+        if (appointmentRepository.existsByDentistIdAndDateAndTime(dto.dentistId(), dto.date(), dto.time())) {
+            throw new AppointmentConflictException("Appointment conflict: Dr." +dentist.getFirstName() +
+                            "is already booked on" + dto.date() +" at " + dto.time());
+        }
+
+        LocalDate startDate = dto.date().with(DayOfWeek.MONDAY);
+        LocalDate endDate = startDate.plusDays(6);
+
+        long appointmentCount = appointmentRepository.countAppointmentsByDentistAndWeek(dentist.getId(), startDate, endDate);
+        if (appointmentCount >= 5) {
+            throw new AppointmentConflictException("Dentist already has 5 appointments scheduled for the week of " + dto.date());
+        }
+
+
 
         Surgery surgery = surgeryRepository.findById(dto.surgeryId())
                 .orElseThrow(() -> new RuntimeException("Surgery not found"));
@@ -65,7 +91,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setPatient(patient);
         appointment.setDentist(dentist);
         appointment.setSurgery(surgery);
-        appointment.setStatus("Scheduled");
+        appointment.setStatus(AppointmentStatus.SCHEDULED);
         appointment.setApproved(true);
 
         Appointment saved = appointmentRepository.save(appointment);
@@ -80,8 +106,12 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (appt.getDate().isBefore(LocalDate.now())) {
             throw new IllegalStateException("Cannot cancel past appointment");
         }
+        if (appt.getStatus() != AppointmentStatus.REQUESTED_CANCEL) {
+            throw new RuntimeException("Appointment must be requested for cancellation by the patient.");
+        }
 
-        appt.setStatus("Cancelled");
+        appt.setStatus(AppointmentStatus.CANCELLED);
+        appt.setApproved(true);
         return appointmentMapper.appointmentToResponseDTO(appointmentRepository.save(appt));
     }
 
@@ -90,14 +120,41 @@ public class AppointmentServiceImpl implements AppointmentService {
         Appointment appt = appointmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
-        if (appt.getDate().isBefore(LocalDate.now())) {
-            throw new IllegalStateException("Cannot update past appointment");
+        if (appt.getStatus() != AppointmentStatus.REQUESTED_CHANGE) {
+            throw new RuntimeException("Appointment must be requested for cancellation by the patient.");
         }
 
         appt.setDate(dto.date());
         appt.setTime(dto.time());
+        appt.setStatus(AppointmentStatus.SCHEDULED);
+        appt.setApproved(true);
 
         return appointmentMapper.appointmentToResponseDTO(appointmentRepository.save(appt));
+    }
+
+    @Override
+    public List<AppointmentResponseDTO> getAppointmentForLoggedDentist() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("user not found"));
+
+        Dentist dentist = dentistRepository.findByUser(user)
+                .orElseThrow(()-> new RuntimeException("Dentist not found"));
+        List<Appointment> appointments = appointmentRepository.findByDentist(dentist);
+        return appointmentMapper.toDtoList(appointments);
+    }
+
+    @Override
+    public List<AppointmentResponseDTO> getAppointmentForLoggedPatient() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(()-> new RuntimeException("user not found"));
+
+        Patient patient = patientRepository.findByUser(user)
+                .orElseThrow(()-> new RuntimeException("Patient not found"));
+
+        List<Appointment> appointments = appointmentRepository.findByPatient(patient);
+        return appointmentMapper.toDtoList(appointments);
     }
 
     @Override
@@ -106,5 +163,56 @@ public class AppointmentServiceImpl implements AppointmentService {
                 appointmentRepository.findByDentistId(dentistId)
         );
     }
+
+    @Override
+    public void requestAppointmentCancellation(Long appointmentId, String reason) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        appointment.setStatus(AppointmentStatus.REQUESTED_CANCEL);
+        appointment.setApproved(false);
+        appointment.setNote(reason);
+
+        appointmentRepository.save(appointment);
+    }
+
+    @Override
+    public void requestAppointmentChange(Long appointmentId, String newDate, String newTime) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        appointment.setStatus(AppointmentStatus.REQUESTED_CHANGE);
+        appointment.setApproved(false);
+        appointment.setNote("Patient requested change to: " + newDate + " at " + newTime);
+
+        appointmentRepository.save(appointment);
+    }
+    public void acceptAppointmentChange(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        if (appointment.getStatus() != AppointmentStatus.REQUESTED_CHANGE) {
+            throw new RuntimeException("No change request to accept.");
+        }
+
+        appointment.setStatus(AppointmentStatus.SCHEDULED);
+        appointmentRepository.save(appointment);
+    }
+
+    public void acceptAppointmentCancellation(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        if (appointment.getStatus() != AppointmentStatus.REQUESTED_CANCEL) {
+            throw new RuntimeException("No cancellation request to accept.");
+        }
+
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+        appointment.setApproved(true);  // Mark the cancellation as approved by the office manager
+
+        appointmentRepository.save(appointment);  // Save the updated appointment
+    }
+
+
 }
 

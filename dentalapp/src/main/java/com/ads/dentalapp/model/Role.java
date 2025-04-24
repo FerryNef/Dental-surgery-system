@@ -1,54 +1,37 @@
 package com.ads.dentalapp.model;
 
-import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import lombok.Data;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-@Entity
-@Table(name ="roles")
-public class Role {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@RequiredArgsConstructor
+public enum Role {
+    PATIENT (
+            Set.of(com.ads.dentalapp.model.Permission.DENTIST_READ)
+    ),
+    OFFICE_MANAGER (
+            Set.of(Permission.OFFICE_MANAGER_WRITE, Permission.OFFICE_MANAGER_READ)
+    ),
+    DENTIST (
+            Set.of(Permission.DENTIST_WRITE, Permission.DENTIST_READ)
+    );
 
-    @Column(nullable = false, unique = true)
-    private String name; // e.g., ROLE_OFFICE_MANAGER, ROLE_DENTIST
+    @Getter
+    private final Set<Permission> permissions;
 
-    @OneToMany(mappedBy = "role")
-    private Set<User> users;
-
-    public Role() {}
-
-    public Role(String name) {
-        this.name = name;
-    }
-
-
-
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Set<User> getUsers() {
-        return users;
-    }
-
-    public void setUsers(Set<User> users) {
-        this.users = users;
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<SimpleGrantedAuthority> authorities = getPermissions().stream()
+                .map(permission -> new SimpleGrantedAuthority(permission.getPermission()))
+                .collect(Collectors.toList());
+        authorities.add(new SimpleGrantedAuthority("ROLE_"+name()));
+        return authorities;
     }
 
 }

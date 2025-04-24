@@ -1,0 +1,19 @@
+FROM ubuntu:latest
+LABEL authors="ferye"
+
+ENTRYPOINT ["top", "-b"]
+
+# Use the official OpenJDK 17 image as a base
+FROM openjdk:17-jdk-slim
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the JAR file into the container
+COPY build/libs/dentalapp-0.0.1-SNAPSHOT.jar /app/dentalapp-0.0.1-SNAPSHOT.jar
+
+# Expose the port that Spring Boot app will run on
+EXPOSE 8080
+
+# Command to run the application
+ENTRYPOINT ["java", "-jar", "dentalapp-0.0.1-SNAPSHOT.jar"]

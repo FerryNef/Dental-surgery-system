@@ -10,11 +10,12 @@ public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private LocalDate date;
     private LocalTime time;
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private AppointmentStatus status;
     private Boolean isApproved;
+    private String note;
 
     @ManyToOne
     @JoinColumn(name = "patient_id")
@@ -36,12 +37,16 @@ public class Appointment {
         return time;
     }
 
-    public String getStatus() {
+    public AppointmentStatus getStatus() {
         return status;
     }
 
     public Boolean getApproved() {
         return isApproved;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 
     public Patient getPatient() {
@@ -64,7 +69,7 @@ public class Appointment {
         this.time = time;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(AppointmentStatus status) {
         this.status = status;
     }
 
@@ -83,6 +88,7 @@ public class Appointment {
     public void setSurgery(Surgery surgery) {
         this.surgery = surgery;
     }
+
 
 
     public Long getId() {
