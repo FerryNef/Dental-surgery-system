@@ -50,5 +50,8 @@ The following ER diagram represents the database design for the Advantis Dental 
 ## 🛠 Technologies Used
 - 📝 StarUML (for UML class diagram)
 - 📂 GitHub for version control
+- Spring boot
+- Docker
+- Restfull API
 
 
