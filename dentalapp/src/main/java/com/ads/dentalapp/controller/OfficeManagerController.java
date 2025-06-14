@@ -64,12 +64,6 @@ public class OfficeManagerController {
         Page<PatientResponseDTO> patientResponseDTOs = patientMapper.toDtoPage(patients);
         return ResponseEntity.ok(patientResponseDTOs);
     }
-    @PostMapping("/patient")
-    @PreAuthorize("hasAuthority('member:write')")
-    public ResponseEntity<String> registerPatient(@RequestBody PatientRequestDTO dto) {
-        patientService.savePatient(dto);
-        return ResponseEntity.ok("Patient registered successfully");
-    }
 
     @GetMapping("/search/{searchString}")
     public ResponseEntity<List<PatientResponseDTO>> searchPatients(@PathVariable String searchString) {

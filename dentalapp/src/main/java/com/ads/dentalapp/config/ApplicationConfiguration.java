@@ -2,6 +2,7 @@ package com.ads.dentalapp.config;
 
 
 import com.ads.dentalapp.repository.UserRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationConfiguration {
+    private final GraphQLConfig graphQLConfig;
     private final UserRepository userRepository;
 
     @Bean
@@ -42,4 +44,9 @@ public class ApplicationConfiguration {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
+    @PostConstruct
+    public void init() {
+        graphQLConfig.setupGraphQL();
+    }
+
 }

@@ -37,6 +37,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/patients/**").hasRole("PATIENT")
                         .requestMatchers("/api/dentists/**").hasRole("DENTIST")
                         .requestMatchers("/api/manager/**").hasRole("OFFICE_MANAGER")
+                        .requestMatchers("/graphql").hasRole("OFFICE_MANAGER")
                         .anyRequest().authenticated())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)

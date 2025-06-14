@@ -1,0 +1,34 @@
+type Query {
+    getPatient (id: Long!): Patient
+    getAllPatients: [Patient]
+    getAppointments:[Appointment]
+    getAppointmentsByPatient(patientId: Int!): [Appointment]
+    getAllDentist: [Dentist]
+}
+scalar Long
+scalar LocalDate
+scalar LocalTime
+
+type Patient {
+    id: Long
+    firstName: String
+    lastName: String
+    email: String
+    phone: String
+    dateOfBirth: LocalDate
+}
+
+type Appointment {
+    id: Long
+    date: LocalDate
+    time: LocalTime
+    status: String
+    dentist: Dentist
+}
+
+type Dentist {
+    id: Long
+    firstName: String
+    lastName: String
+    specialization: String
+}

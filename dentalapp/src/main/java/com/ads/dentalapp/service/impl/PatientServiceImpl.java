@@ -29,6 +29,10 @@ public class PatientServiceImpl implements PatientService {
         Pageable pageable = PageRequest.of(page, size);
         return patientRepository.findAll(pageable);
     }
+    @Override
+    public List<Patient> getAllPatients () {
+        return patientRepository.findAll();
+    }
 
     public Patient getPatientById(Long id) {
         return patientRepository.findById(id).orElseThrow(() -> new PatientNotFoundException(id));

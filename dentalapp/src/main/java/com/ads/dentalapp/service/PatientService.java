@@ -13,7 +13,7 @@ public interface PatientService {
     Patient savePatient(PatientRequestDTO patientDTO);
     Patient updatePatient(Long id, Patient patient);
     void deletePatient(Long id);
-
+    List<Patient> getAllPatients ();
     List<Patient> getAllPatientsSortedByLastName();
 
     List<Patient> searchPatients(String searchString);

@@ -1,8 +1,3 @@
-FROM ubuntu:latest
-LABEL authors="ferye"
-
-ENTRYPOINT ["top", "-b"]
-
 # Use the official OpenJDK 17 image as a base
 FROM openjdk:17-jdk-slim
 

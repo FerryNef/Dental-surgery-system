@@ -40,6 +40,11 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'com.graphql-java:graphql-java:23.1'
+	implementation 'com.graphql-java:graphql-java-tools:5.2.4'
+    implementation 'org.springframework.boot:spring-boot-starter-graphql'
+	implementation 'com.graphql-java:graphql-java-servlet:6.1.3'
+
 
 }
 

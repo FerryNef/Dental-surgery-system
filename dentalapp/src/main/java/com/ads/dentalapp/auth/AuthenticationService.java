@@ -1,13 +1,11 @@
 package com.ads.dentalapp.auth;
 
 import com.ads.dentalapp.config.JwtService;
-import com.ads.dentalapp.model.Dentist;
-import com.ads.dentalapp.model.Patient;
-import com.ads.dentalapp.model.Role;
-import com.ads.dentalapp.model.User;
+import com.ads.dentalapp.model.*;
 import com.ads.dentalapp.repository.DentistRepository;
 import com.ads.dentalapp.repository.PatientRepository;
 import com.ads.dentalapp.repository.UserRepository;
+import com.ads.dentalapp.service.AddressService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +21,7 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final PatientRepository patientRepository;
     private final DentistRepository dentistRepository;
+    private final AddressService addressService;
 
 
 
@@ -38,10 +37,27 @@ public class AuthenticationService {
                 role
         );
         if (role == Role.PATIENT) {
-            Patient patient = patientRepository.findByEmail(request.email())
-                    .orElseThrow(() -> new RuntimeException("Patient not found"));
-            user.setPatient(patient);
-            patient.setUser(user);
+            Address addr = new Address();
+            addr.setStreet(request.street());
+            addr.setCity(request.city());
+            addr.setState(request.state());
+            addr.setZipCode(request.zipCode());
+            addr.setCountry(request.country());
+            Address savedAddr = addressService.saveAddress(addr);
+
+            Patient patient = new Patient();
+            patient.setFirstName(request.firstName());
+            patient.setLastName(request.lastName());
+            patient.setEmail(request.email());
+            patient.setPhone(request.phone());
+            patient.setDateOfBirth(request.dateOfBirth());
+            patient.setAddress(savedAddr);
+
+            Patient savedPatient = patientRepository.save(patient);
+
+            user.setPatient(savedPatient);
+            savedPatient.setUser(user);
+
         } else if (role == Role.DENTIST) {
             Dentist dentist = dentistRepository.findByEmail(request.email())
                     .orElseThrow(() -> new RuntimeException("Dentist not found"));

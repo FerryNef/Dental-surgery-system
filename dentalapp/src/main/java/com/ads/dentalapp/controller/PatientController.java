@@ -101,11 +101,6 @@ public class PatientController {
         return ResponseEntity.ok("Change request submitted.");
     }
 
-//    @PutMapping("/{id}")
-//    public ResponseEntity<PatientResponseDTO> updatePatient(@PathVariable Long id, @RequestBody PatientRequestDTO patientRequestDTO) {
-//        Patient updatedPatient = patientService.updatePatient(id, patientMapper.toEntity(patientRequestDTO));
-//        return ResponseEntity.ok(patientMapper.toDto(updatedPatient));
-//    }
 
     @GetMapping("/bills")
     public ResponseEntity<List<BillResponseDTO>> getMyBills() {

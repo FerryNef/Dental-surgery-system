@@ -55,6 +55,13 @@ public class AppointmentServiceImpl implements AppointmentService {
         Patient patient = appointment.getPatient();
         return patientMapper.toDto(patient);
     }
+    @Override
+    public List<Appointment> getAppointmentsByPatientId(Long patientId) {
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+        return appointmentRepository.findByPatient(patient);
+    }
+
 
 
     @Override

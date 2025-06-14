@@ -12,6 +12,7 @@ public interface AppointmentService {
 
     PatientResponseDTO getPatientForAppointment(Long appointmentId);
 
+    List<Appointment> getAppointmentsByPatientId(Long patientId);
 
     AppointmentResponseDTO scheduleAppointment(AppointmentRequestDTO dto);
     AppointmentResponseDTO cancelAppointment(Long appointmentId);
